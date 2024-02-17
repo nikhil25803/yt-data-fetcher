@@ -8,6 +8,9 @@ from .models import VideoDataModel, APIKeysModel
 # Load environment variables
 load_dotenv()
 
+# Load keyword from .env file
+KEYWORD = os.getenv("KEYWORD") if os.getenv("KEYWORD") else "html"
+
 
 class FetchAPIData:
     """
@@ -41,7 +44,6 @@ class FetchAPIData:
         # Deocde the next available key
 
     def get_query_data(self):
-        self.__get_new_key()
         query_params = {
             "key": self.__key,
             "q": self.query,
