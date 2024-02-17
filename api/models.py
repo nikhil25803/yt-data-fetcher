@@ -14,3 +14,11 @@ class VideoDataModel(models.Model):
 
     def __str__(self) -> str:
         return f"Video ID: {self.videoId}"
+
+
+class APIKeysModel(models.Model):
+    key_name = models.CharField(max_length=1000)
+    key_value = models.CharField(max_length=1000, unique=True)
+
+    def __str__(self) -> str:
+        return f"Key: {self.key_name}"

@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ytdata.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ytdata.settings")
 
 application = get_wsgi_application()

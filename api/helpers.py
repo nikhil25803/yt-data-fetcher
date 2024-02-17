@@ -1,8 +1,9 @@
-import requests, os
+import requests, os, base64
 from dotenv import load_dotenv
 from datetime import datetime
 from django.utils.timezone import make_aware
-from .models import VideoDataModel
+from .models import VideoDataModel, APIKeysModel
+
 
 # Load environment variables
 load_dotenv()
@@ -18,26 +19,54 @@ class FetchAPIData:
     ```
     """
 
-    def __init__(self, query="python") -> None:
+    def __init__(self, query="rust") -> None:
         self.query = query
         self.url = "https://www.googleapis.com/youtube/v3/search"
         self.obj_list = []
+        self.__key = os.getenv("GOOGLE_API_KEY")
+
+    def __get_new_key(self):
+        current_key = self.__key
+
+        next_key_available = APIKeysModel.objects.exclude(key_value=current_key).first()
+
+        if next_key_available:
+            next_key = next_key_available.key_value
+            self.__key = next_key
+            # print(next_key)
+            return True
+        else:
+            return False
+
+        # Deocde the next available key
 
     def get_query_data(self):
+        self.__get_new_key()
         query_params = {
-            "key": os.getenv("GOOGLE_API_KEY"),
+            "key": self.__key,
             "q": self.query,
             "type": "video",
             "order": "date",
             "part": "snippet",
         }
         response_data = []
+        self.data_fetched = False
+        self.api_response = None
         try:
             request_response = requests.get(url=self.url, params=query_params)
             if request_response.status_code == 200:
-
+                self.data_fetched = True
+                self.api_response = request_response
+            else:
+                self.data_fetched = False
+                retry = self.__get_new_key()
+                if retry == True:
+                    self.api_response = requests.get(url=self.url, params=query_params)
+                else:
+                    self.data_fetched = False
+            if self.data_fetched == True and self.api_response is not None:
                 # Get the response data in JSON format
-                json_response = request_response.json()
+                json_response = self.api_response.json()
 
                 for _obj in json_response["items"]:
                     # Create a new object for each record
